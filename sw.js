@@ -13,7 +13,7 @@
  * caches sont supprimés à l'activation.
  * ========================================================================== */
 
-const CACHE_VERSION = "v1.3.0";
+const CACHE_VERSION = "v1.4.0";
 const SHELL_CACHE = `eq-shell-${CACHE_VERSION}`;     // app shell pré-caché
 const ASSET_CACHE = `eq-assets-${CACHE_VERSION}`;    // assets / audios (cache-first)
 const CONTENT_CACHE = `eq-content-${CACHE_VERSION}`; // contenu évolutif (network-first)
@@ -29,6 +29,7 @@ const APP_SHELL = [
   "./offline.html",
   "./manifest.json",
   "./js/app.js",
+  "./js/illustrations.js",
   "./data/lessons.json",
   "./icons/icon-192-v2.png",
   "./icons/icon-512-v2.png",
