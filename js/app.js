@@ -14,6 +14,7 @@
 const STORAGE_KEY = "eq:progress:v1";
 const TAB_KEY = "eq:tab";
 const THEME_KEY = "eq:theme";
+const VOICE_KEY = "eq:voice";
 const PASS_SCORE = 0.6;   // 60 % au quiz → leçon validée
 const UNLOCK_RATIO = 0.5; // 50 % du niveau précédent → niveau suivant débloqué
 const TABS = ["levels", "learn", "quiz"];
@@ -253,6 +254,79 @@ function renderLearn() {
     </div>`;
 }
 
+/* ---------- Voix de lecture : fille ou garçon ---------- */
+/*
+ * La synthèse vocale du navigateur ne propose pas toujours de voix d'enfant.
+ * Stratégie : 1) une vraie voix d'enfant si l'appareil en a une (Edge : Maisie,
+ * Ana) ; 2) sinon une voix adulte du bon genre, rendue plus jeune en montant
+ * la hauteur (pitch). Anglais britannique uniquement (en-GB) ; une autre voix
+ * anglaise n'est utilisée que si l'appareil n'a aucune voix britannique.
+ */
+const VOICE_PROFILES = {
+  girl: {
+    label: "Fille",
+    child: [/maisie/i],
+    adult: [/libby/i, /sonia/i, /hazel/i, /kate/i, /serena/i, /susan/i, /bella/i, /female/i],
+    pitch: 1.5,
+  },
+  boy: {
+    label: "Garçon",
+    child: [],
+    adult: [/ryan/i, /thomas/i, /oliver/i, /george/i, /arthur/i, /daniel/i, /\bmale/i],
+    pitch: 1.4,
+  },
+};
+
+const voiceChoice = () => (readPref(VOICE_KEY) === "boy" ? "boy" : "girl");
+
+let voicesCache = [];
+function loadVoices() {
+  if (!("speechSynthesis" in window)) return;
+  voicesCache = speechSynthesis.getVoices().filter((v) => /^en[-_]/i.test(v.lang));
+}
+if ("speechSynthesis" in window) {
+  loadVoices();
+  // La liste des voix arrive souvent en différé (Chrome) : on la recharge à sa disponibilité.
+  speechSynthesis.addEventListener?.("voiceschanged", loadVoices);
+}
+
+/** Choisit la meilleure voix pour le profil. Renvoie { voice, pitch }. */
+function pickVoice(profileKey) {
+  const profile = VOICE_PROFILES[profileKey];
+  // Voix britanniques uniquement ; repli sur l'anglais seulement si aucune n'existe.
+  const british = voicesCache.filter((v) => /^en[-_]GB/i.test(v.lang));
+  const ordered = british.length ? british : voicesCache;
+  const find = (patterns) => patterns.map((re) => ordered.find((v) => re.test(v.name))).find(Boolean);
+
+  const child = find(profile.child);
+  if (child) return { voice: child, pitch: 1.1 };         // déjà une voix d'enfant
+  const adult = find(profile.adult);
+  return { voice: adult || ordered[0] || null, pitch: profile.pitch };
+}
+
+/** Lit un texte en anglais avec la voix choisie (fille / garçon). */
+function speak(text, { slow = false } = {}) {
+  if (!("speechSynthesis" in window)) return;
+  const { voice, pitch } = pickVoice(voiceChoice());
+  const utter = new SpeechSynthesisUtterance(text);
+  if (voice) utter.voice = voice;
+  utter.lang = "en-GB"; // prononciation britannique demandée même en repli
+  utter.pitch = pitch;
+  utter.rate = slow ? 0.85 : 1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
+function voiceSwitchHtml() {
+  const current = voiceChoice();
+  return `
+    <div class="flex items-center gap-2 text-sm" role="group" aria-label="Voix de lecture">
+      <span class="text-muted">Voix :</span>
+      ${Object.entries(VOICE_PROFILES).map(([key, p]) => `
+        <button class="btn !py-1 !px-3 text-sm ${key === current ? "btn-primary" : ""}" data-action="set-voice" data-voice="${key}" aria-pressed="${key === current}">${p.label}</button>`).join("")}
+    </div>`;
+}
+
 /* ---------- Lecteur audio simulé ---------- */
 function audioPlayerHtml(lesson) {
   const duration = lesson.audio?.duration ?? 30;
@@ -265,7 +339,8 @@ function audioPlayerHtml(lesson) {
         <div class="meter"><span id="audio-bar" style="width:0%"></span></div>
         <div class="flex justify-between text-xs text-muted tabular"><span id="audio-time">0:00</span><span>${fmtTime(duration)}</span></div>
       </div>
-    </div>`;
+    </div>
+    ${"speechSynthesis" in window ? voiceSwitchHtml() : ""}`;
 }
 
 function toggleAudio() {
@@ -276,14 +351,8 @@ function toggleAudio() {
   state.audio = { lessonId: lesson.id, elapsed: resumeAt >= duration ? 0 : resumeAt, duration, playing: true, timer: null };
 
   // Bonus : lecture réelle par synthèse vocale anglaise (fonctionne hors ligne sur la plupart des appareils).
-  if ("speechSynthesis" in window) {
-    const text = lesson.type === "vocab" ? lesson.words.map((w) => w.en).join(". ") : lesson.text.join(" ");
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-GB";
-    utter.rate = lesson.levelId === 1 ? 0.8 : 0.95;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utter);
-  }
+  const text = lesson.type === "vocab" ? lesson.words.map((w) => w.en).join(". ") : lesson.text.join(" ");
+  speak(text, { slow: lesson.levelId === 1 });
 
   setAudioIcon(true);
   state.audio.timer = setInterval(() => {
@@ -457,14 +526,16 @@ document.addEventListener("click", (event) => {
       el.dataset.flipped = el.dataset.flipped === "true" ? "false" : "true";
       // Prononce le mot quand la carte montre la face anglaise.
       const word = currentLesson().words[Number(el.dataset.index)];
-      if (el.dataset.flipped === "true" && "speechSynthesis" in window) {
-        const u = new SpeechSynthesisUtterance(word.en);
-        u.lang = "en-GB"; u.rate = 0.8;
-        speechSynthesis.cancel(); speechSynthesis.speak(u);
-      }
+      if (el.dataset.flipped === "true") speak(word.en, { slow: true });
       break;
     }
     case "toggle-audio": toggleAudio(); break;
+    case "set-voice":
+      stopAudio();
+      writePref(VOICE_KEY, el.dataset.voice);
+      renderLearn();
+      speak(el.dataset.voice === "boy" ? "Hi! I'm your reading buddy." : "Hello! I'm your reading buddy.");
+      break;
     case "go-quiz": state.quiz = null; switchTab("quiz"); break;
     case "go-learn": switchTab("learn"); break;
     case "answer": answerQuestion(Number(el.dataset.index)); break;
