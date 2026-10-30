@@ -1,0 +1,419 @@
+{
+  "version": "2026-10-30b",
+  "levels": [
+    {
+      "id": 1,
+      "title": "Premiers mots",
+      "cefr": "A1",
+      "audience": "Débutant · Enfant",
+      "description": "Vocabulaire illustré, flashcards et audios courts.",
+      "lessons": [
+        {
+          "id": "l1-animals",
+          "type": "vocab",
+          "title": "Animals",
+          "audio": {
+            "duration": 20
+          },
+          "words": [
+            {
+              "en": "cat",
+              "fr": "chat",
+              "pic": "🐱"
+            },
+            {
+              "en": "dog",
+              "fr": "chien",
+              "pic": "🐶"
+            },
+            {
+              "en": "bird",
+              "fr": "oiseau",
+              "pic": "🐦"
+            },
+            {
+              "en": "fish",
+              "fr": "poisson",
+              "pic": "🐟"
+            },
+            {
+              "en": "horse",
+              "fr": "cheval",
+              "pic": "🐴"
+            },
+            {
+              "en": "rabbit",
+              "fr": "lapin",
+              "pic": "🐰"
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Comment dit-on « chien » en anglais ?",
+              "choices": [
+                "cat",
+                "dog",
+                "bird"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "What is a « rabbit » ?",
+              "choices": [
+                "un lapin",
+                "un cheval",
+                "un poisson"
+              ],
+              "answer": 0
+            },
+            {
+              "q": "🐟 = ?",
+              "choices": [
+                "horse",
+                "bird",
+                "fish"
+              ],
+              "answer": 2
+            }
+          ]
+        },
+        {
+          "id": "l1-colours",
+          "type": "vocab",
+          "title": "Colours",
+          "audio": {
+            "duration": 18
+          },
+          "words": [
+            {
+              "en": "red",
+              "fr": "rouge",
+              "pic": "🍎"
+            },
+            {
+              "en": "yellow",
+              "fr": "jaune",
+              "pic": "🍋"
+            },
+            {
+              "en": "green",
+              "fr": "vert",
+              "pic": "🥦"
+            },
+            {
+              "en": "blue",
+              "fr": "bleu",
+              "pic": "🫐"
+            }
+          ],
+          "quiz": [
+            {
+              "q": "A lemon is…",
+              "choices": [
+                "blue",
+                "yellow",
+                "red"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "« Vert » se dit…",
+              "choices": [
+                "green",
+                "grey",
+                "great"
+              ],
+              "answer": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Au collège",
+      "cefr": "A2–B1",
+      "audience": "Intermédiaire · Collège",
+      "description": "Articles courts, grammaire en contexte, compréhension écrite et orale.",
+      "lessons": [
+        {
+          "id": "l2-school-day",
+          "type": "article",
+          "title": "Tom's school day",
+          "audio": {
+            "duration": 45
+          },
+          "text": [
+            "Tom lives in Manchester. He gets up at seven o'clock every morning.",
+            "He usually takes the bus to school. His favourite subject is science, but he doesn't like maths.",
+            "After school, he plays football with his friends in the park."
+          ],
+          "grammar": {
+            "title": "Present simple",
+            "rule": "Habitudes : he/she/it + verbe + -s (he gets, he plays). Négation : doesn't + base verbale (he doesn't like)."
+          },
+          "quiz": [
+            {
+              "q": "Where does Tom live?",
+              "choices": [
+                "London",
+                "Manchester",
+                "Leeds"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "Choisis la forme correcte : « She ___ to school by bus. »",
+              "choices": [
+                "go",
+                "goes",
+                "going"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "Which subject does Tom dislike?",
+              "choices": [
+                "science",
+                "maths",
+                "sport"
+              ],
+              "answer": 1
+            }
+          ]
+        },
+        {
+          "id": "l2-weekend",
+          "type": "article",
+          "title": "Last weekend",
+          "audio": {
+            "duration": 40
+          },
+          "text": [
+            "Last Saturday, Emma visited her grandparents in Brighton.",
+            "They walked on the beach and ate fish and chips. On Sunday, it rained, so they watched a film."
+          ],
+          "grammar": {
+            "title": "Prétérit (past simple)",
+            "rule": "Verbes réguliers : base + -ed (visited, walked). Irréguliers à apprendre : eat → ate, go → went."
+          },
+          "quiz": [
+            {
+              "q": "What did they eat?",
+              "choices": [
+                "pizza",
+                "fish and chips",
+                "sandwiches"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "Le prétérit de « eat » est…",
+              "choices": [
+                "eated",
+                "ate",
+                "eaten"
+              ],
+              "answer": 1
+            }
+          ]
+        },
+        {
+          "id": "l2-hobbies",
+          "type": "article",
+          "title": "My hobbies",
+          "audio": {
+            "duration": 40
+          },
+          "text": [
+            "Hi, I'm Priya and I'm thirteen. I love reading comics and I enjoy drawing my own characters.",
+            "My brother Sam is different: he hates sitting still. He loves skateboarding and he is good at swimming.",
+            "At the weekend, we both like cooking pancakes with our dad."
+          ],
+          "grammar": {
+            "title": "Love / like / enjoy / hate + -ing",
+            "rule": "Après les verbes de goût, le verbe suivant prend -ing : I love reading, he hates sitting. Même chose après « good at » : good at swimming."
+          },
+          "quiz": [
+            {
+              "q": "What does Priya enjoy?",
+              "choices": [
+                "skateboarding",
+                "drawing",
+                "swimming"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "Complète : « Sam hates ___ still. »",
+              "choices": [
+                "sit",
+                "to sitting",
+                "sitting"
+              ],
+              "answer": 2
+            },
+            {
+              "q": "What do they like doing together?",
+              "choices": [
+                "cooking pancakes",
+                "reading comics",
+                "playing football"
+              ],
+              "answer": 0
+            }
+          ]
+        },
+        {
+          "id": "l2-london",
+          "type": "article",
+          "title": "A trip to London",
+          "audio": {
+            "duration": 50
+          },
+          "text": [
+            "Our class went to London last month. It is bigger and busier than our town!",
+            "The London Eye was the most exciting part of the trip: from the top, the river Thames looked smaller than a ribbon.",
+            "The museums were free, but the food was more expensive than at home."
+          ],
+          "grammar": {
+            "title": "Comparatif et superlatif",
+            "rule": "Adjectif court : big → bigger than → the biggest. Adjectif long : expensive → more expensive than → the most expensive."
+          },
+          "quiz": [
+            {
+              "q": "What was the most exciting part of the trip?",
+              "choices": [
+                "the museums",
+                "the London Eye",
+                "the food"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "Le comparatif de « busy » est…",
+              "choices": [
+                "more busy",
+                "busier",
+                "the busiest"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "The food in London was…",
+              "choices": [
+                "cheaper",
+                "free",
+                "more expensive"
+              ],
+              "answer": 2
+            }
+          ]
+        },
+        {
+          "id": "l2-cafe",
+          "type": "article",
+          "title": "At the café",
+          "audio": {
+            "duration": 45
+          },
+          "text": [
+            "Waiter: Good morning! What would you like?",
+            "Lucas: I'd like a hot chocolate and a muffin, please. How much is it?",
+            "Waiter: That's four pounds fifty. Would you like anything else?",
+            "Lucas: No, thank you. Can I pay by card?"
+          ],
+          "grammar": {
+            "title": "Commander poliment : would like",
+            "rule": "« I'd like… » (= I would like) est plus poli que « I want… ». Question : « Would you like…? ». Pour un prix : « How much is it? »."
+          },
+          "quiz": [
+            {
+              "q": "What does Lucas order?",
+              "choices": [
+                "a tea and a cake",
+                "a hot chocolate and a muffin",
+                "a coffee"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "How much does it cost?",
+              "choices": [
+                "£4.15",
+                "£5.40",
+                "£4.50"
+              ],
+              "answer": 2
+            },
+            {
+              "q": "La façon la plus polie de commander :",
+              "choices": [
+                "I want a muffin.",
+                "I'd like a muffin, please.",
+                "Give me a muffin."
+              ],
+              "answer": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "L'actu en anglais",
+      "cefr": "B1–B2",
+      "audience": "Avancé · Lycée",
+      "description": "Actualités simplifiées, expression écrite et modules audio longs.",
+      "lessons": [
+        {
+          "id": "l3-ocean",
+          "type": "article",
+          "title": "Cleaning up the oceans",
+          "audio": {
+            "duration": 90
+          },
+          "text": [
+            "Every year, millions of tonnes of plastic end up in the oceans.",
+            "Young activists around the world are organising beach clean-ups and calling on governments to ban single-use plastics.",
+            "Scientists warn that, unless we act now, there could be more plastic than fish in the sea by 2050."
+          ],
+          "grammar": {
+            "title": "Unless = if… not",
+            "rule": "« Unless we act now » = « If we don't act now ». Suivi du présent, jamais de will."
+          },
+          "prompt": "In 3–4 sentences, explain what you personally do to reduce plastic waste.",
+          "quiz": [
+            {
+              "q": "What do young activists ask governments to do?",
+              "choices": [
+                "Build more ports",
+                "Ban single-use plastics",
+                "Stop fishing"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "« Unless we act now » signifie…",
+              "choices": [
+                "Si nous agissons",
+                "Si nous n'agissons pas",
+                "Quand nous agirons"
+              ],
+              "answer": 1
+            },
+            {
+              "q": "The article mentions the year…",
+              "choices": [
+                "2030",
+                "2050",
+                "2100"
+              ],
+              "answer": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "/",
+  "name": "English Malin – Parcours d'anglais",
+  "short_name": "English Malin",
+  "description": "Apprends l'anglais pas à pas : vocabulaire illustré, articles, quiz et audios, même hors connexion.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f8fafc",
+  "theme_color": "#1b2a4a",
+  "categories": ["education", "kids", "books"],
+  "icons": [
+    {
+      "src": "icons/icon-192-v2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Reprendre ma leçon",
+      "short_name": "Apprendre",
+      "url": "./index.html?tab=learn",
+      "icons": [{ "src": "icons/icon-192-v2.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Faire un quiz",
+      "short_name": "Quiz",
+      "url": "./index.html?tab=quiz",
+      "icons": [{ "src": "icons/icon-192-v2.png", "sizes": "192x192" }]
+    }
+  ]
+}
