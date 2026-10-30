@@ -8,6 +8,8 @@
  *  - Zone de quiz : QCM interactif, score enregistré
  * ========================================================================== */
 
+import { mascotSvg, levelScene, launchConfetti } from "./illustrations.js";
+
 /* ---------------------------------------------------------------------------
  * 1. Constantes & état
  * ------------------------------------------------------------------------ */
@@ -93,6 +95,15 @@ function globalRatio() {
   return lessons.length ? lessons.filter((l) => isDone(l.id)).length / lessons.length : 0;
 }
 
+/** Étoiles d'une leçon selon le meilleur score : 1 (validée), 2 (≥ 80 %), 3 (100 %). */
+function lessonStars(lessonId) {
+  const best = state.progress.quizScores[lessonId]?.best ?? 0;
+  return best >= 1 ? 3 : best >= 0.8 ? 2 : best >= PASS_SCORE ? 1 : 0;
+}
+const totalStars = () => allLessons().reduce((sum, l) => sum + lessonStars(l.id), 0);
+const starsHtml = (n) =>
+  `<span class="tabular" aria-label="${n} étoile${n > 1 ? "s" : ""} sur 3">${[0, 1, 2].map((i) => `<span class="${i < n ? "star" : "text-line"}" aria-hidden="true">★</span>`).join("")}</span>`;
+
 /** Leçon courante : celle mémorisée, sinon la première non terminée du niveau courant. */
 function currentLesson() {
   const saved = state.progress.currentLesson && findLesson(state.progress.currentLesson);
@@ -163,34 +174,60 @@ function renderDashboard() {
   $("#global-label").textContent = pct(ratio);
   $("#global-bar").style.width = `${ratio * 100}%`;
   $("#global-meter").setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
+  $("#star-count").textContent = totalStars();
 
-  $("#levels-grid").innerHTML = state.content.levels.map((level) => {
-    const unlocked = isUnlocked(level);
-    const ratioLevel = levelRatio(level);
-    const isCurrent = level.id === state.progress.currentLevel;
-    const lessonsList = level.lessons.map((l) =>
-      `<li class="flex items-center gap-2"><span aria-hidden="true">${isDone(l.id) ? "✓" : "○"}</span>
-         <span class="${isDone(l.id) ? "line-through text-muted" : ""}">${esc(l.title)}</span></li>`).join("");
+  // Malin adapte son message à la progression.
+  const current = currentLesson();
+  $("#hero-mascot").innerHTML = mascotSvg(ratio === 1 ? "wow" : "happy", 92);
+  $("#hero-bubble").textContent =
+    ratio === 0 ? "Hello! Je suis Malin. On commence ?"
+    : ratio === 1 ? "Amazing! Tu as tout terminé !"
+    : `Welcome back! On continue avec « ${current.title} » ?`;
 
+  // Rail de leçons du niveau en cours : cartes illustrées.
+  const level = findLevel(current.levelId);
+  $("#rail-title").textContent = `Niveau ${level.id} · ${level.title}`;
+  $("#lessons-rail").innerHTML = level.lessons.map((l, i) => `
+    <button class="lesson-card pop-in grid" style="--i:${i}" data-action="pick-and-learn" data-lesson="${l.id}">
+      <span class="lesson-art" style="background:${esc(l.tint || "var(--hero)")}">
+        ${(l.scene || ["📘"]).map((e, j) => `<span style="--j:${j}" aria-hidden="true">${esc(e)}</span>`).join("")}
+      </span>
+      <span class="grid gap-1 p-4">
+        <span class="flex items-center justify-between gap-2">
+          <strong class="font-display text-lg">${esc(l.title)}</strong>
+          ${isDone(l.id) ? `<span class="badge-done text-xs font-bold px-2 py-0.5 rounded-full">Fait</span>` : ""}
+        </span>
+        <span class="text-sm text-muted">${l.type === "vocab" ? `${l.words.length} mots illustrés` : "Article + grammaire"} · ${l.quiz.length} questions</span>
+        ${starsHtml(lessonStars(l.id))}
+      </span>
+    </button>`).join("");
+
+  // Les 3 niveaux : cartes avec scène illustrée.
+  $("#levels-grid").innerHTML = state.content.levels.map((lv, i) => {
+    const unlocked = isUnlocked(lv);
+    const r = levelRatio(lv);
+    const isCurrent = lv.id === state.progress.currentLevel;
     return `
-      <article class="level-card p-5 grid gap-4 content-start" data-locked="${!unlocked}"
-               style="--fill: var(--l${level.id}); border-top: 6px solid var(--l${level.id})">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="eyebrow">Niveau ${level.id} · ${esc(level.audience)}</p>
-            <h2 class="font-display text-2xl font-extrabold mt-1">${esc(level.title)}</h2>
+      <article class="level-card pop-in grid content-start" style="--i:${i}; --fill: var(--l${lv.id})" data-locked="${!unlocked}">
+        <div class="relative">
+          ${levelScene(lv.id)}
+          <span class="absolute top-3 left-3 bg-surface text-ink text-xs font-bold px-2 py-1 rounded-full tabular" title="Cadre européen (CECRL)">${esc(lv.cefr)}</span>
+          ${unlocked ? "" : `<span class="absolute inset-0 grid place-items-center text-4xl" style="background: color-mix(in srgb, var(--bg) 55%, transparent)" aria-hidden="true">🔒</span>`}
+        </div>
+        <div class="grid gap-3 p-5">
+          <div>
+            <p class="eyebrow">Niveau ${lv.id} · ${esc(lv.audience)}</p>
+            <h3 class="font-display text-2xl font-bold">${esc(lv.title)}</h3>
           </div>
-          <span class="shrink-0 text-xs font-bold px-2 py-1 rounded-md border border-line tabular" title="Cadre européen (CECRL)">${esc(level.cefr)}</span>
+          <p class="text-muted">${esc(lv.description)}</p>
+          <div class="grid gap-1">
+            <div class="meter"><span style="width:${r * 100}%"></span></div>
+            <p class="text-sm text-muted tabular">${lv.lessons.filter((l) => isDone(l.id)).length} / ${lv.lessons.length} leçons · ${pct(r)}</p>
+          </div>
+          <button class="btn ${isCurrent ? "btn-primary" : ""} justify-center" data-action="open-level" data-level="${lv.id}" ${unlocked ? "" : "disabled"}>
+            ${unlocked ? (r > 0 ? "Continuer" : "Commencer") : `Valide ${Math.round(UNLOCK_RATIO * 100)} % du niveau ${lv.id - 1}`}
+          </button>
         </div>
-        <p class="text-muted">${esc(level.description)}</p>
-        <ul class="grid gap-1 text-sm">${lessonsList}</ul>
-        <div class="grid gap-1">
-          <div class="meter"><span style="width:${ratioLevel * 100}%"></span></div>
-          <p class="text-sm text-muted tabular">${pct(ratioLevel)} terminé</p>
-        </div>
-        <button class="btn ${isCurrent ? "btn-primary" : ""} justify-center" data-action="open-level" data-level="${level.id}" ${unlocked ? "" : "disabled"}>
-          ${unlocked ? (ratioLevel > 0 ? "Continuer" : "Commencer") : `Valide ${Math.round(UNLOCK_RATIO * 100)} % du niveau ${level.id - 1}`}
-        </button>
       </article>`;
   }).join("");
 }
@@ -244,8 +281,13 @@ function renderLearn() {
   panel.innerHTML = `
     <div class="grid gap-6">
       <div class="grid gap-2">
-        <p class="eyebrow">Niveau ${level.id} · ${esc(level.cefr)}</p>
-        <h1 class="font-display text-3xl md:text-4xl font-extrabold">${esc(lesson.title)}</h1>
+        <div class="lesson-card !shadow-none flex items-center gap-4 p-4 pop-in" style="background:${esc(lesson.tint || "var(--hero)")}; color:#1b2a4a">
+          <span class="lesson-art !p-0 !text-4xl">${(lesson.scene || ["📘"]).map((e, j) => `<span style="--j:${j}" aria-hidden="true">${esc(e)}</span>`).join("")}</span>
+          <span class="grid min-w-0">
+            <span class="text-xs font-bold uppercase tracking-wider">Niveau ${level.id} · ${esc(level.cefr)}</span>
+            <h1 class="font-display text-3xl md:text-4xl font-bold">${esc(lesson.title)}</h1>
+          </span>
+        </div>
         <div class="flex flex-wrap gap-2">${picker}</div>
       </div>
       ${audioPlayerHtml(lesson)}
@@ -402,9 +444,14 @@ function renderQuiz() {
     const ratio = quiz.correct / total;
     const passed = ratio >= PASS_SCORE;
     panel.innerHTML = `
-      <div class="grid gap-4 max-w-xl">
+      <div class="grid gap-4 max-w-xl pop-in">
+        <div class="flex items-center gap-4">
+          ${mascotSvg(passed ? "wow" : "sad", 96)}
+          <p class="bubble">${passed ? (ratio === 1 ? "Perfect! Sans faute !" : "Well done!") : "Oops! On réessaie ensemble ?"}</p>
+        </div>
         <p class="eyebrow">Résultat · ${esc(lesson.title)}</p>
-        <h1 class="font-display text-4xl font-extrabold tabular">${quiz.correct} / ${total}</h1>
+        <h1 class="font-display text-5xl font-bold tabular">${quiz.correct} / ${total}</h1>
+        <p class="text-3xl">${starsHtml(lessonStars(lesson.id))}</p>
         <p class="text-lg ${passed ? "text-ok" : "text-ko"} font-bold">
           ${passed ? "Leçon validée, bravo !" : `Il faut ${Math.round(PASS_SCORE * 100)} % pour valider. Relis la leçon et réessaie.`}
         </p>
@@ -415,6 +462,7 @@ function renderQuiz() {
                    : `<button class="btn btn-primary" data-action="go-learn">Revoir la leçon</button>`}
         </div>
       </div>`;
+    if (passed && quiz.celebrate) { quiz.celebrate = false; launchConfetti(); }
     return;
   }
 
@@ -427,9 +475,12 @@ function renderQuiz() {
         </div>
         <div class="meter"><span style="width:${(quiz.index / total) * 100}%"></span></div>
       </div>
-      <h1 class="font-display text-2xl md:text-3xl font-extrabold">${esc(q.q)}</h1>
+      <div class="flex items-center gap-3">
+        <span id="quiz-mascot">${mascotSvg("happy", 64)}</span>
+        <h1 class="font-display text-2xl md:text-3xl font-bold min-w-0">${esc(q.q)}</h1>
+      </div>
       <div class="grid gap-2" role="group" aria-label="Réponses">
-        ${q.choices.map((c, i) => `<button class="choice" data-action="answer" data-index="${i}">${esc(c)}</button>`).join("")}
+        ${q.choices.map((c, i) => `<button class="choice pop-in font-bold" style="--i:${i}" data-action="answer" data-index="${i}">${esc(c)}</button>`).join("")}
       </div>
       <p id="feedback" class="font-bold min-h-[1.6em]" aria-live="polite"></p>
       <div><button class="btn btn-primary" data-action="next-question" id="next-btn" disabled>
@@ -453,7 +504,8 @@ function answerQuestion(choiceIndex) {
     else if (i === choiceIndex) btn.dataset.state = "wrong";
   });
   const feedback = $("#feedback");
-  feedback.textContent = good ? "Correct !" : `Pas tout à fait : « ${q.choices[q.answer]} ».`;
+  feedback.textContent = good ? "Great job! C'est correct." : `Pas tout à fait : « ${q.choices[q.answer]} ».`;
+  $("#quiz-mascot").innerHTML = mascotSvg(good ? "wow" : "sad", 64);
   feedback.className = `font-bold min-h-[1.6em] ${good ? "text-ok" : "text-ko"}`;
   $("#next-btn").disabled = false;
 }
@@ -463,7 +515,10 @@ function nextQuestion() {
   quiz.index += 1;
   quiz.answered = false;
   const lesson = findLesson(quiz.lessonId);
-  if (quiz.index >= lesson.quiz.length) recordQuizResult(lesson, quiz.correct / lesson.quiz.length);
+  if (quiz.index >= lesson.quiz.length) {
+    recordQuizResult(lesson, quiz.correct / lesson.quiz.length);
+    quiz.celebrate = true;
+  }
   renderQuiz();
 }
 
@@ -521,6 +576,7 @@ document.addEventListener("click", (event) => {
       switchTab("learn");
       break;
     }
+    case "pick-and-learn": selectLesson(el.dataset.lesson); switchTab("learn"); break;
     case "pick-lesson": stopAudio(); selectLesson(el.dataset.lesson); renderLearn(); break;
     case "flip": {
       el.dataset.flipped = el.dataset.flipped === "true" ? "false" : "true";
